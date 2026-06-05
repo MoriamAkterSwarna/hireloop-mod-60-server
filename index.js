@@ -37,9 +37,10 @@ async function run() {
         const jobCollection = database.collection("jobs");
         const companyCollection = database.collection("companies");
         const usersCollection = database.collection("user");
+        const applicationsCollection = database.collection("applications");
 
         app.get('/api/users', async (req, res) => {
-            
+
             const cursor = usersCollection.find().skip(6);
             const result = await cursor.toArray();
             res.send(result);
@@ -77,8 +78,19 @@ async function run() {
             res.send(result);
         })
 
-        // company related apis
+        // application related apis
 
+        app.post('/api/applications', async (req, res) => {
+            const application = req.body;
+            const newApplication = {
+                ...application,
+                createdAt: new Date()
+            }
+            const result = await applicationsCollection.insertOne(newApplication);
+            res.send(result);
+        })
+
+        // company related apis
         app.get('/api/companies', async (req, res) => {
             const cursor = companyCollection.find().skip(4);
             const result = await cursor.toArray();
