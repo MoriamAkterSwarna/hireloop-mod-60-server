@@ -210,6 +210,21 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/api/admin/users", async (req, res) => {
+        const cursor = usersCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    });
+
+    app.patch("/api/admin/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const updates = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDocument = { $set: updates };
+      const result = await usersCollection.updateOne(filter, updateDocument);
+      res.send(result);
+    });
+
   
 
     // Send a ping to confirm a successful connection
