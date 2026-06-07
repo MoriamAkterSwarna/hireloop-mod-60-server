@@ -176,12 +176,50 @@ async function run() {
         status: "pending",
       });
 
+      const totalRecruiters = await usersCollection.countDocuments({ role: "recruiter" });
+      const totalCompanies = await companyCollection.countDocuments();
+
+      let categoryData = [];
+      try {
+        categoryData = await jobCollection.aggregate([
+          { $group: { _id: "$category", value: { $sum: 1 } } },
+          { $project: { name: { $ifNull: ["$_id", "Uncategorized"] }, value: 1, _id: 0 } },
+          { $sort: { value: -1 } },
+          { $limit: 5 }
+        ]).toArray();
+      } catch (e) {
+        console.error("Error fetching categoryData", e);
+      }
+
+      let newUsersData = [];
+      try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const newUsersAggregation = await usersCollection.aggregate([
+          { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+          {
+            $group: {
+              _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+              value: { $sum: 1 }
+            }
+          },
+          { $sort: { _id: 1 } }
+        ]).toArray();
+        newUsersData = newUsersAggregation.map(d => ({ name: d._id, value: d.value }));
+      } catch (e) {
+        console.error("Error fetching newUsersData", e);
+      }
+
       res.json({
         totalUsers,
         totalJobs,
         totalApplications,
         totalRevenue: totalRevenue[0]?.total || 0,
         pendingJobs,
+        totalRecruiters,
+        totalCompanies,
+        categoryData,
+        newUsersData
       });
     });
 
