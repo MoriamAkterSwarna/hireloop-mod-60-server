@@ -1,3 +1,6 @@
+const dns = require('dns')
+dns.setServers(['8.8.8.8', '4.4.4.4'])
+
 const express = require('express')
 const cors = require('cors');
 const app = express()
@@ -182,3 +185,4 @@ run().catch(console.dir);
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
