@@ -240,6 +240,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/api/admin/subscriptions", async (req, res) => {
+      const cursor = subscriptionCollection.find().sort({ createdAt: -1 });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
   
 
     // Send a ping to confirm a successful connection
