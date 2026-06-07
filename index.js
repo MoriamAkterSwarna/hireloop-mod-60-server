@@ -165,8 +165,6 @@ async function run() {
       res.send(updateResult);
     });
 
-
-
     app.get("/api/admin/stats", async (req, res) => {
       const totalUsers = await usersCollection.countDocuments();
       const totalJobs = await jobCollection.countDocuments();
@@ -187,6 +185,28 @@ async function run() {
       });
     });
 
+    app.get("/api/admin/jobs", async (req, res) => {
+      //    get all jobs data 
+      const query = {};
+      const cursor = jobCollection.find(query);
+      const result = await cursor.toArray();
+
+    //   company name show in jobs table
+    const jobWithCompany = result.map(async job => {
+        const company = await companyCollection.findOne({ _id: new ObjectId(job.companyId) });
+        return { ...job, company };
+    });
+    const jobData = await Promise.all(jobWithCompany);
+ 
+      res.send(jobData);
+    });
+
+
+
+   
+
+
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
